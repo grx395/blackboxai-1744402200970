@@ -1,56 +1,65 @@
 class StorageManager {
     constructor() {
-        this.songs = [];
-        this.audioData = {};
+        this.songs = JSON.parse(localStorage.getItem('songs')) || [];
+        this.audioData = JSON.parse(localStorage.getItem('audioData')) || {};
         this.initialized = false;
         this.initializeStorage();
     }
 
     async initializeStorage() {
-        try {
-            const data = await githubStorage.initialize();
-            this.songs = data.songs;
-            this.audioData = data.audioData;
-            this.initialized = true;
-        } catch (error) {
-            console.error('Error initializing storage:', error);
-            // Fallback to localStorage if GitHub storage fails
-            this.songs = JSON.parse(localStorage.getItem('songs')) || [];
-            this.audioData = JSON.parse(localStorage.getItem('audioData')) || {};
-            this.initialized = true;
+        // Initialize with sample data if no songs exist
+        if (this.songs.length === 0) {
+            const sampleSongs = [
+                {
+                    id: '1',
+                    name: 'Amazing Grace',
+                    composer: 'John Newton',
+                    lyrics: 'Amazing grace, how sweet the sound\nThat saved a wretch like me.\nI once was lost, but now am found,\nWas blind, but now I see.',
+                    tags: ['hymn', 'classic', 'worship'],
+                    demoText: 'Demo song'
+                },
+                {
+                    id: '2',
+                    name: 'How Great Thou Art',
+                    composer: 'Carl Boberg',
+                    lyrics: 'O Lord my God, when I in awesome wonder\nConsider all the worlds Thy hands have made,\nI see the stars, I hear the rolling thunder,\nThy power throughout the universe displayed.',
+                    tags: ['hymn', 'worship', 'traditional'],
+                    demoText: 'Demo song'
+                },
+                {
+                    id: '3',
+                    name: 'It Is Well',
+                    composer: 'Horatio Spafford',
+                    lyrics: 'When peace like a river attendeth my way,\nWhen sorrows like sea billows roll,\nWhatever my lot, Thou hast taught me to say,\nIt is well, it is well with my soul.',
+                    tags: ['hymn', 'peace', 'classic'],
+                    demoText: 'Demo song'
+                }
+            ];
+            this.songs = sampleSongs;
+            await this.saveSongs();
         }
-    }
-
-    async waitForInitialization() {
-        if (!this.initialized) {
-            await new Promise(resolve => {
-                const checkInit = () => {
-                    if (this.initialized) {
-                        resolve();
-                    } else {
-                        setTimeout(checkInit, 100);
-                    }
-                };
-                checkInit();
-            });
-        }
+        this.initialized = true;
     }
 
     async saveSongs() {
-        try {
-            await githubStorage.saveSongsData({
-                songs: this.songs,
-                audioData: this.audioData
-            });
-        } catch (error) {
-            console.error('Error saving to GitHub:', error);
-            // Fallback to localStorage
-            localStorage.setItem('songs', JSON.stringify(this.songs));
-            localStorage.setItem('audioData', JSON.stringify(this.audioData));
+        // Save to localStorage
+        localStorage.setItem('songs', JSON.stringify(this.songs));
+        localStorage.setItem('audioData', JSON.stringify(this.audioData));
+
+        // If GitHub token exists and we're in admin mode, also save to GitHub
+        if (localStorage.getItem('github_token') && localStorage.getItem('adminAuth') === 'true') {
+            try {
+                await githubStorage.saveSongsData({
+                    songs: this.songs,
+                    audioData: this.audioData
+                });
+            } catch (error) {
+                console.error('Error saving to GitHub:', error);
+            }
         }
     }
 
-    addSong(song, audioData = null, audioUrl = null) {
+    async addSong(song, audioData = null, audioUrl = null) {
         song.id = Date.now().toString();
         song.tags = typeof song.tags === 'string' ? 
             song.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : 
@@ -67,7 +76,7 @@ class StorageManager {
         }
         
         this.songs.push(song);
-        this.saveSongs();
+        await this.saveSongs();
         return song;
     }
 
@@ -83,7 +92,7 @@ class StorageManager {
         return song;
     }
 
-    updateSong(id, updatedSong, audioData = null, audioUrl = null) {
+    async updateSong(id, updatedSong, audioData = null, audioUrl = null) {
         const index = this.songs.findIndex(song => song.id === id);
         if (index !== -1) {
             const existingSong = this.songs[index];
@@ -109,18 +118,18 @@ class StorageManager {
                 demoText: updatedSong.demoText || existingSong.demoText || 'Demo song'
             };
             
-            this.saveSongs();
+            await this.saveSongs();
             return true;
         }
         return false;
     }
 
-    deleteSong(id) {
+    async deleteSong(id) {
         const index = this.songs.findIndex(song => song.id === id);
         if (index !== -1) {
             this.songs.splice(index, 1);
             delete this.audioData[id];
-            this.saveSongs();
+            await this.saveSongs();
             return true;
         }
         return false;
@@ -173,7 +182,7 @@ class StorageManager {
         return this.audioData[songId] || null;
     }
 
-    updateAudioData(songId, audioData = null, audioUrl = null) {
+    async updateAudioData(songId, audioData = null, audioUrl = null) {
         if (audioData) {
             this.audioData[songId] = { type: 'file', data: audioData };
         } else if (audioUrl) {
@@ -182,7 +191,7 @@ class StorageManager {
                 data: audioUrl 
             };
         }
-        this.saveSongs();
+        await this.saveSongs();
     }
 
     isYouTubeUrl(url) {
