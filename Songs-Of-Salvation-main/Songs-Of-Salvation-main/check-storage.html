@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Storage</title>
+</head>
+<body>
+    <pre id="output"></pre>
+    <script>
+        const songs = JSON.parse(localStorage.getItem('songs')) || [];
+        document.getElementById('output').textContent = JSON.stringify(songs, null, 2);
+    </script>
+</body>
+</html>
