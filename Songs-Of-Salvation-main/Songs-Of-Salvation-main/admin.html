@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Songs of Salvation</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gradient-to-br from-rose-100 to-teal-100 min-h-screen">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white bg-opacity-70 backdrop-blur-lg shadow-lg z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-home text-gray-600"></i>
+                </a>
+                <button id="logoutBtn" class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-sign-out-alt text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-20 pb-8">
+        <!-- Upload Section -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Upload New Song</h2>
+            <form id="uploadForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Song Name</label>
+                    <input type="text" id="songName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Composer</label>
+                    <input type="text" id="composer" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Lyrics</label>
+                    <textarea id="lyrics" required rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tags (comma separated)</label>
+                    <input type="text" id="tags" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Audio Version</label>
+                    <input type="text" id="demoText" placeholder="Demo song" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Audio File (optional)</label>
+                        <input type="file" id="audioFile" accept="audio/*" class="mt-1 block w-full">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Audio URL (optional)</label>
+                        <input type="url" id="audioUrl" placeholder="Direct audio file URL or YouTube video URL" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-teal-600 text-white py-2 px-4 rounded-md hover:bg-teal-700">
+                    Upload Song
+                </button>
+            </form>
+        </div>
+
+        <!-- Manage Songs -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Manage Songs</h2>
+            <div class="space-y-4" id="manageSongsList">
+                <!-- Songs will be dynamically added here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Song Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 w-11/12 max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Edit Song</h3>
+                <button id="closeEditModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editForm" class="space-y-4">
+                <input type="hidden" id="editSongId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Song Name</label>
+                    <input type="text" id="editSongName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Composer</label>
+                    <input type="text" id="editComposer" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Lyrics</label>
+                    <textarea id="editLyrics" required rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tags (comma separated)</label>
+                    <input type="text" id="editTags" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Audio Version</label>
+                    <input type="text" id="editDemoText" placeholder="Demo song" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Update Audio File (optional)</label>
+                        <input type="file" id="editAudioFile" accept="audio/*" class="mt-1 block w-full">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Update Audio URL (optional)</label>
+                        <input type="url" id="editAudioUrl" placeholder="Direct audio file URL or YouTube video URL" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                    </div>
+                    <div id="currentAudioStatus" class="text-sm text-gray-500"></div>
+                </div>
+                <button type="submit" class="w-full bg-teal-600 text-white py-2 px-4 rounded-md hover:bg-teal-700">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/github-storage.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
