@@ -1,10 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check GitHub token
-    if (!localStorage.getItem('github_token')) {
-        window.location.href = 'auth.html';
-        return;
-    }
-
     // Check admin authentication
     if (!isAdminAuthenticated()) {
         window.location.href = 'index.html';
@@ -18,10 +12,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editForm = document.getElementById('editForm');
     const closeEditModal = document.getElementById('closeEditModal');
     const logoutBtn = document.getElementById('logoutBtn');
+    const githubBtn = document.getElementById('githubBtn');
+    const githubModal = document.getElementById('githubModal');
+    const closeGithubModal = document.getElementById('closeGithubModal');
+    const githubForm = document.getElementById('githubForm');
 
     // Initialize
-    await storage.waitForInitialization();
+    await storage.initializeStorage();
     renderManageSongs();
+    updateGithubButtonStatus();
+
+    // GitHub token setup
+    githubBtn.addEventListener('click', () => {
+        githubModal.classList.remove('hidden');
+        githubModal.classList.add('flex');
+        const currentToken = localStorage.getItem('github_token') || '';
+        document.getElementById('githubToken').value = currentToken;
+    });
+
+    closeGithubModal.addEventListener('click', () => {
+        githubModal.classList.add('hidden');
+        githubModal.classList.remove('flex');
+    });
+
+    githubForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = document.getElementById('githubToken').value;
+        localStorage.setItem('github_token', token);
+        updateGithubButtonStatus();
+        githubModal.classList.add('hidden');
+        githubModal.classList.remove('flex');
+        showNotification('GitHub token saved successfully!');
+
+        // Sync current data to GitHub
+        try {
+            await storage.saveSongs();
+            showNotification('Data synchronized with GitHub!');
+        } catch (error) {
+            console.error('Error syncing with GitHub:', error);
+            showNotification('Error syncing with GitHub', 'error');
+        }
+    });
+
+    function updateGithubButtonStatus() {
+        const hasToken = !!localStorage.getItem('github_token');
+        githubBtn.innerHTML = `<i class="fab fa-github text-${hasToken ? 'teal' : 'gray'}-600"></i>`;
+        githubBtn.title = hasToken ? 'GitHub Sync Enabled' : 'Setup GitHub Sync';
+    }
 
     // Upload form handler
     uploadForm.addEventListener('submit', async (e) => {
@@ -81,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             name: document.getElementById('editSongName').value,
             composer: document.getElementById('editComposer').value,
             lyrics: document.getElementById('editLyrics').value,
-            tags: document.getElementById('editTags').value.split(',').map(tag => tag.trim()).filter(tag => tag),
+            tags: document.getElementById('editTags').value,
             demoText: document.getElementById('editDemoText').value || 'Demo song'
         };
 
@@ -121,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function renderManageSongs() {
-        const songs = await storage.getAllSongs();
+        const songs = storage.getAllSongs();
         manageSongsList.innerHTML = '';
 
         if (songs.length === 0) {
@@ -138,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const songElement = document.createElement('div');
             songElement.className = 'bg-white rounded-lg shadow p-4 flex items-center justify-between';
             
-            const audioData = await storage.getAudioData(song.id);
+            const audioData = storage.getAudioData(song.id);
             const audioStatus = audioData ? 
                 audioData.type === 'youtube' ? 'YouTube video linked' :
                 audioData.type === 'url' ? 'Audio URL linked' :
@@ -168,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Edit button handler
             songElement.querySelector('.edit-btn').addEventListener('click', async () => {
-                const songToEdit = await storage.getSong(song.id);
+                const songToEdit = storage.getSong(song.id);
                 showEditModal(songToEdit);
             });
 
@@ -193,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    async function showEditModal(song) {
+    function showEditModal(song) {
         document.getElementById('editSongId').value = song.id;
         document.getElementById('editSongName').value = song.name;
         document.getElementById('editComposer').value = song.composer;
@@ -203,7 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Show current audio status
         const currentAudioStatus = document.getElementById('currentAudioStatus');
-        const audioData = await storage.getAudioData(song.id);
+        const audioData = storage.getAudioData(song.id);
         
         if (audioData) {
             if (audioData.type === 'youtube') {
