@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Songs of Salvation</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins min-h-screen bg-gradient-to-br transition-all duration-300">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 backdrop-blur-lg shadow-lg z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold theme-text transition-colors duration-300">Songs of Salvation</h1>
+            <div class="flex items-center gap-4">
+                <button id="themeBtn" class="p-2 rounded-full transition-all duration-300" data-accent>
+                    <i class="fas fa-palette"></i>
+                </button>
+                <button id="adminBtn" class="p-2 rounded-full transition-all duration-300" data-accent>
+                    <i class="fas fa-user-lock"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-20 pb-8">
+        <!-- Search Section -->
+        <div class="search-section rounded-2xl p-4 mb-6 transition-all duration-300">
+            <div class="flex flex-col gap-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search songs..." 
+                           class="w-full pl-10 pr-4 py-2 rounded-lg border theme-text transition-colors duration-300 focus:outline-none"
+                           data-accent>
+                    <i class="fas fa-search absolute left-3 top-3 theme-text opacity-60"></i>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <select id="sortFilter" class="px-3 py-2 rounded-lg border theme-text transition-all duration-300">
+                        <option value="az">A-Z</option>
+                        <option value="za">Z-A</option>
+                        <option value="newest">Newest</option>
+                        <option value="oldest">Oldest</option>
+                    </select>
+                    <button id="tagSearchBtn" class="theme-button px-3 py-2 rounded-lg flex items-center gap-2 transition-all duration-300">
+                        <i class="fas fa-tags"></i>
+                        Tags
+                    </button>
+                    <button id="viewToggle" class="theme-button px-3 py-2 rounded-lg transition-all duration-300">
+                        <i class="fas fa-th-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Songs List -->
+        <div id="songsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Songs will be dynamically added here -->
+        </div>
+    </main>
+
+    <!-- Theme Selector Modal -->
+    <div id="themeModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="modal-content backdrop-blur rounded-2xl p-8 w-11/12 max-w-2xl shadow-2xl transition-all duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-1 theme-text">Customize Your Theme</h3>
+                    <p class="theme-text opacity-60">Choose from our beautiful collection of themes</p>
+                </div>
+                <button id="closeThemeModal" class="p-2 rounded-full transition-all duration-300" data-accent>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6" id="themeOptions">
+                <!-- Themes will be added here -->
+            </div>
+            <div class="mt-6 pt-6 border-t theme-border">
+                <p class="theme-text opacity-60 flex items-center gap-2">
+                    <i class="fas fa-info-circle" data-accent></i>
+                    Click any theme to preview and apply
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="fixed inset-0 hidden z-[9999] bg-black/70 backdrop-blur-sm">
+        <!-- Modal -->
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl ring-1 ring-black/5">
+                <!-- Header -->
+                <div class="flex justify-between items-center p-6 border-b">
+                    <h3 class="text-xl font-semibold theme-text">Admin Login</h3>
+                    <button id="closeAdminModal" class="p-2 hover:bg-gray-100 rounded-full transition-all duration-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <!-- Form -->
+                <form id="adminLoginForm" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="adminEmail" 
+                               class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                               autocomplete="email">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="adminPassword" 
+                               class="mt-1 block w-full px-3 py-2 rounded-md border border-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                               autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300">
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/themes.js"></script>
+    <script src="js/github-storage.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
