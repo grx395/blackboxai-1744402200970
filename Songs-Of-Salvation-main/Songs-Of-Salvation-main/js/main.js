@@ -1,10 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check for GitHub token
-    if (!localStorage.getItem('github_token')) {
-        window.location.href = 'auth.html';
-        return;
-    }
-
     // Elements
     const searchInput = document.getElementById('searchInput');
     const sortFilter = document.getElementById('sortFilter');
@@ -27,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize view
     updateViewMode();
+    await storage.initializeStorage();
     renderSongs();
 
     // Search and filter handlers
